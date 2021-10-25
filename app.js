@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const userRoutes = require('./routes/user');
+
 mongoose.connect('mongodb+srv://first-user_1:1234abcd@cluster0.tnaik.mongodb.net/test?retryWrites=true&w=majority', { 
     useNewUrlParser: true,
     useUnifiedTopology: true })
@@ -17,5 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+app.use('/api/auth', userRoutes);
 
 module.exports = app;
