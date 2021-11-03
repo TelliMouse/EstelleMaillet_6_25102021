@@ -18,10 +18,28 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-    const sauceObject = req.file ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    } : {...req.body};
+    let sauceObject;
+    if(req.file) {
+        console.log('req file existant');
+        Sauce.findOne({_id: req.params.id})
+        .then(sauce => {
+            console.log('sauce trouvée');
+            const filename = sauce.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, () => {
+                console.log('image unlink');
+                sauceObject = {
+                    ...JSON.parse(req.body.sauce),
+                    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+                };
+                console.log(typeof sauceObject)
+                console.log(sauceObject);
+            })
+        })
+        .catch(error => res.status(500).json({error}));
+    } else {
+        sauceObject = {...req.body};
+        console.log(sauceObject);
+    };
     Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id})
     .then(() => res.status(200).json({message: 'Sauce successfully modified'}))
     .catch(error => res.status(400).json({error}));
@@ -43,6 +61,8 @@ exports.deleteSauce = (req, res, next) => {
 exports.likeSauce = (req, res, next) => {
     Sauce.findOne({_id: req.params.id})
     .then(sauce => {
+
+        console.log('sauce found');
         let sauceObject;
 
         const hasTheUserAlreadyLikedOrDisliked = () => {
@@ -65,22 +85,30 @@ exports.likeSauce = (req, res, next) => {
             return false;
         };
 
+        console.log('function hasUser: ' + hasTheUserAlreadyLikedOrDisliked());
+        console.log('reqbodylike: ' + req.body.like);
 
-        if(req.body.like === 1 && !hasTheUserAlreadyLikedOrDisliked) {
+
+        if(req.body.like === 1 && !hasTheUserAlreadyLikedOrDisliked()) {
+            console.log('if condition 1');
             sauceObject = {
                 ...sauce,
                 likes: sauce.likes++,
                 usersLiked: sauce.usersLiked.push(req.body.userId)
             };
+            console.log('sauceObject created');
+            console.log(sauceObject);
 
-        } else if(req.body.like === -1 && !hasTheUserAlreadyLikedOrDisliked) {
+        } else if(req.body.like === -1 && !hasTheUserAlreadyLikedOrDisliked()) {
+            console.log('if condition 2');
             sauceObject = {
                 ...sauce,
                 dislikes: sauce.dislikes++,
                 usersDisliked : sauce.usersDisliked.push(req.body.userId)
             };
 
-        } else if(req.body.like === 0 & hasTheUserAlreadyLikedOrDisliked === 'likes') {
+        } else if(req.body.like === 0 & hasTheUserAlreadyLikedOrDisliked() === 'likes') {
+            console.log('if condition 3');
             const newUsersLiked = sauce.usersLiked;
             const index = newUsersLiked.indexOf(req.body.userId);
             newUsersLiked.splice(index, 1);
@@ -90,7 +118,8 @@ exports.likeSauce = (req, res, next) => {
                 usersLiked: newUsersLiked
             };
 
-        } else if(req.body.like === 0 && hasTheUserAlreadyLikedOrDisliked === 'dislikes') {
+        } else if(req.body.like === 0 && hasTheUserAlreadyLikedOrDisliked() === 'dislikes') {
+            console.log('if condition 4');
             const newUsersDisliked = sauce.usersDisliked;
             const index = newUsersDisliked.indexOf(req.body.userId);
             newUsersDisliked.splice(index, 1);
@@ -101,9 +130,11 @@ exports.likeSauce = (req, res, next) => {
             };
 
         } else {
+            console.log('no if condition matched');
             return res.status(400).json({message: 'The user cannot like/dislike the sauce'});
         }
-
+        console.log('updateOne object: ' + sauceObject);
+        console.log(typeof sauceObject);
         Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id})
         .then(() => res.status(200).json({message: 'Sauce successfully liked/disliked'}))
         .catch(error => res.status(400).json({error}));
