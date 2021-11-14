@@ -14,7 +14,7 @@ The repo for the front-end can be found here: https://github.com/OpenClassrooms-
 * Bcrypt: version 5.0.1 (https://github.com/kelektiv/node.bcrypt.js)  
 * Dotenv: version 10.0.0 (https://github.com/motdotla/dotenv)
 
-If you want the app to reload automatically when you make changes to the backend, you can use:
+If you want the app to reload automatically when you make changes to the backend, you can use:  
 Nodemon: version 2.0.15 (https://github.com/remy/nodemon)  
 
 On Windows, these installations require to use PowerShell in administrator mode.
