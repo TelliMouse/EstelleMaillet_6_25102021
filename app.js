@@ -6,6 +6,7 @@ require('dotenv').config();
 const userRoutes = require('./routes/user');
 const sauceRoutes = require('./routes/sauce');
 
+//Connection to mongoDB, with username and password from .env
 const username = process.env.MONGO_USER;
 const password = process.env.MONGO_PASS;
 
@@ -17,6 +18,7 @@ mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.tnaik.mongodb.n
 
 const app = express();
 
+//Addition of headers to avoid CORS error
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');

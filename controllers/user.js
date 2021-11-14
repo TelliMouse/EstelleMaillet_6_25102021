@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 require('dotenv').config();
 
+//Hash password contained in request and create a new user
 exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.password, 10)
     .then(hash => {
@@ -23,12 +24,14 @@ exports.login = (req, res, next) => {
         if(!user) {
             return res.status(401).json({message: 'User not found!'});
         }
+        //Compare request password hash against database password hash with bcrypt
         bcrypt.compare(req.body.password, user.password)
         .then(valid => {
             if(!valid) {
                 return res.status(401).json({message: 'Password is invalid!'})
             }
             res.status(200).json({
+                //Return the userId and a token with the userId, crypted with .env token secret ans that expires in 24h
                 userId: user._id,
                 token: jwt.sign(
                     {userId: user._id},

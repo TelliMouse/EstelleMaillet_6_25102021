@@ -12,6 +12,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, callback) => {
         const startingName = file.originalname.split(' ').join('_');
+        //Delete the extension at the end of the filename, to then add the date, and the new extension
         let name;
         if(/.jpg$/.test(startingName)) {
             name = startingName.split('.jpg')[0];
